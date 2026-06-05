@@ -1,0 +1,16 @@
+# dependencias
+node_modules/
+
+# build
+dist/
+
+# credenciales — NUNCA subir esto
+.env
+.env.local
+.env.*.local
+
+# macOS
+.DS_Store
+
+# editor
+.vscode/
