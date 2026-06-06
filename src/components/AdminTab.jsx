@@ -10,6 +10,7 @@ export default function AdminTab() {
 
   // formularios
   const [newRoundName, setNewRoundName] = useState('')
+  const [newRoundMultiplier, setNewRoundMultiplier] = useState(1)
   const [home, setHome] = useState('')
   const [away, setAway] = useState('')
   const [kickoff, setKickoff] = useState('')
@@ -47,10 +48,25 @@ export default function AdminTab() {
 
   async function createRound() {
     if (!newRoundName.trim()) return
-    const { error } = await supabase.from('rounds').insert({ name: newRoundName.trim() })
+    const { error } = await supabase.from('rounds').insert({
+      name: newRoundName.trim(),
+      multiplier: newRoundMultiplier,
+    })
     if (error) return flash('Error al crear jornada.')
     setNewRoundName('')
+    setNewRoundMultiplier(1)
     flash('Jornada creada ✓')
+    loadRounds()
+  }
+
+  async function updateMultiplier(value) {
+    if (!activeRound) return
+    const { error } = await supabase
+      .from('rounds')
+      .update({ multiplier: value })
+      .eq('id', activeRound)
+    if (error) return flash('Error al actualizar multiplicador.')
+    flash(`Multiplicador actualizado a x${value} ✓`)
     loadRounds()
   }
 
@@ -102,6 +118,16 @@ export default function AdminTab() {
             value={newRoundName}
             onChange={(e) => setNewRoundName(e.target.value)}
           />
+          <select
+            className="multiplier-select"
+            value={newRoundMultiplier}
+            onChange={(e) => setNewRoundMultiplier(Number(e.target.value))}
+            title="Multiplicador de puntos"
+          >
+            {[1, 2, 3, 4, 5].map((n) => (
+              <option key={n} value={n}>{n === 1 ? 'x1 (normal)' : `x${n}`}</option>
+            ))}
+          </select>
           <button className="btn-primary" onClick={createRound}>
             Crear
           </button>
@@ -118,10 +144,28 @@ export default function AdminTab() {
           {rounds.length === 0 && <option value="">No hay jornadas</option>}
           {rounds.map((r) => (
             <option key={r.id} value={r.id}>
-              {r.name}
+              {r.name}{r.multiplier > 1 ? ` — x${r.multiplier}` : ''}
             </option>
           ))}
         </select>
+
+        {activeRound && (() => {
+          const r = rounds.find((r) => r.id === activeRound)
+          return r ? (
+            <div className="multiplier-row">
+              <span className="muted tiny">Multiplicador de puntos:</span>
+              <select
+                className="multiplier-select"
+                value={r.multiplier ?? 1}
+                onChange={(e) => updateMultiplier(Number(e.target.value))}
+              >
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>{n === 1 ? 'x1 (normal)' : `x${n}`}</option>
+                ))}
+              </select>
+            </div>
+          ) : null
+        })()}
 
         <h4 className="sub">Agregar partido</h4>
         <div className="match-form">

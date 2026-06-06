@@ -136,6 +136,10 @@ export default function WeekTab({ profile }) {
           ))}
         </select>
 
+        {selectedRound?.multiplier > 1 && (
+          <div className="multiplier-badge">✕{selectedRound.multiplier}</div>
+        )}
+
         {lockTime && (
           <div className={locked ? 'lock-badge closed' : 'lock-badge open'}>
             {locked ? (
@@ -166,9 +170,9 @@ export default function WeekTab({ profile }) {
         <>
           <p className="muted section-note">
             Escribe tu marcador para cada partido. Puedes editarlos hasta 1 hora
-            antes del primer partido. <strong>1 punto</strong> si aciertas quién
-            gana o si hay empate, <strong>3 puntos</strong> si aciertas el marcador
-            exacto.
+            antes del primer partido.{' '}
+            <strong>{selectedRound?.multiplier > 1 ? selectedRound.multiplier : 1} punto{selectedRound?.multiplier > 1 ? 's' : ''}</strong> por resultado,{' '}
+            <strong>{(selectedRound?.multiplier ?? 1) * 3} puntos</strong> por marcador exacto.
           </p>
 
           <div className="match-list">
