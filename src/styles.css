@@ -214,7 +214,15 @@ input, select, button { font-size: 1rem; }
 .inline-form { display: flex; gap: 0.5rem; }
 .inline-form input { flex: 1; }
 .match-form { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 0.5rem; }
-.match-form input[type="datetime-local"] { min-width: 180px; }
+.time-picker { display: flex; align-items: center; gap: 0.3rem; }
+.hour-input { width: 3rem; text-align: center; padding: 0.7rem 0.4rem !important; }
+.time-colon { font-weight: 700; color: var(--ink-dim); }
+.min-select, .ampm-select {
+  background: var(--bg); border: 1px solid var(--line); color: var(--ink);
+  padding: 0.7rem 0.4rem; border-radius: 10px; outline: none;
+}
+.ampm-select { font-weight: 700; }
+.noon-hint { font-size: 0.68rem; color: var(--pitch); font-weight: 700; white-space: nowrap; padding: 0.2rem 0.35rem; background: rgba(100,220,130,0.08); border-radius: 6px; }
 .results-list { display: flex; flex-direction: column; gap: 0.6rem; }
 .result-row { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px; padding: 0.65rem 0.8rem; flex-wrap: wrap; }
 .result-teams { font-weight: 700; }
@@ -225,7 +233,7 @@ input, select, button { font-size: 1rem; }
 /* ------- Responsive ------- */
 @media (max-width: 620px) {
   .match-form { grid-template-columns: 1fr 1fr; }
-  .match-form input[type="datetime-local"], .match-form button { grid-column: span 2; }
+  .match-form input[type="date"], .match-form .time-picker, .match-form button { grid-column: span 2; }
   .team { font-size: 0.92rem; }
   .brand-name { font-size: 1rem; }
   .content { padding: 1rem 0.7rem 3rem; }

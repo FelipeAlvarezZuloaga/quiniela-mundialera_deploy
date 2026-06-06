@@ -13,7 +13,10 @@ export default function AdminTab() {
   const [newRoundMultiplier, setNewRoundMultiplier] = useState(1)
   const [home, setHome] = useState('')
   const [away, setAway] = useState('')
-  const [kickoff, setKickoff] = useState('')
+  const [kickoffDate, setKickoffDate] = useState('')
+  const [kickoffHour, setKickoffHour] = useState('12')
+  const [kickoffMin, setKickoffMin] = useState('00')
+  const [kickoffAmpm, setKickoffAmpm] = useState('PM')
 
   async function loadRounds() {
     const { data } = await supabase.from('rounds').select('*').order('id')
@@ -70,19 +73,33 @@ export default function AdminTab() {
     loadRounds()
   }
 
+  function buildKickoffISO() {
+    if (!kickoffDate) return null
+    const h = parseInt(kickoffHour, 10)
+    const m = parseInt(kickoffMin, 10)
+    let hour24 = h % 12
+    if (kickoffAmpm === 'PM') hour24 += 12
+    const pad = (n) => String(n).padStart(2, '0')
+    return localInputToISO(`${kickoffDate}T${pad(hour24)}:${pad(m)}`)
+  }
+
   async function addMatch() {
     if (!activeRound) return flash('Crea o elige una jornada primero.')
-    if (!home.trim() || !away.trim() || !kickoff) return flash('Completa equipos y fecha.')
+    const iso = buildKickoffISO()
+    if (!home.trim() || !away.trim() || !iso) return flash('Completa equipos y fecha.')
     const { error } = await supabase.from('matches').insert({
       round_id: activeRound,
       home_team: home.trim(),
       away_team: away.trim(),
-      kickoff: localInputToISO(kickoff),
+      kickoff: iso,
     })
     if (error) return flash('Error al agregar partido.')
     setHome('')
     setAway('')
-    setKickoff('')
+    setKickoffDate('')
+    setKickoffHour('12')
+    setKickoffMin('00')
+    setKickoffAmpm('PM')
     flash('Partido agregado ✓')
     loadMatches(activeRound)
   }
@@ -180,10 +197,46 @@ export default function AdminTab() {
             onChange={(e) => setAway(e.target.value)}
           />
           <input
-            type="datetime-local"
-            value={kickoff}
-            onChange={(e) => setKickoff(e.target.value)}
+            type="date"
+            value={kickoffDate}
+            onChange={(e) => setKickoffDate(e.target.value)}
           />
+          <div className="time-picker">
+            <input
+              type="number"
+              className="hour-input"
+              min="1"
+              max="12"
+              value={kickoffHour}
+              onChange={(e) => {
+                const v = e.target.value.replace(/\D/g, '')
+                if (v === '' || (parseInt(v) >= 1 && parseInt(v) <= 12)) setKickoffHour(v)
+              }}
+            />
+            <span className="time-colon">:</span>
+            <select
+              className="min-select"
+              value={kickoffMin}
+              onChange={(e) => setKickoffMin(e.target.value)}
+            >
+              {['00','05','10','15','20','25','30','35','40','45','50','55'].map(m => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
+            <select
+              className="ampm-select"
+              value={kickoffAmpm}
+              onChange={(e) => setKickoffAmpm(e.target.value)}
+            >
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+            {kickoffHour === '12' && (
+              <span className="noon-hint">
+                {kickoffAmpm === 'PM' ? 'Mediodía' : 'Medianoche'}
+              </span>
+            )}
+          </div>
           <button className="btn-primary" onClick={addMatch}>
             Agregar
           </button>
