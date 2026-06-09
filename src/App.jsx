@@ -9,6 +9,7 @@ export default function App() {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [profileLoading, setProfileLoading] = useState(false)
   const [tab, setTab] = useState('week')
 
   // Escuchar el estado de la sesion
@@ -27,16 +28,23 @@ export default function App() {
   useEffect(() => {
     if (!session) {
       setProfile(null)
+      setProfileLoading(false)
       return
     }
     let cancel = false
+    setProfileLoading(true)
     supabase
       .from('profiles')
       .select('*')
       .eq('id', session.user.id)
       .single()
-      .then(({ data }) => {
-        if (!cancel) setProfile(data)
+      .then(({ data, error }) => {
+        if (cancel) return
+        if (error) {
+          console.error('Error cargando perfil:', error)
+        }
+        setProfile(data ?? null)
+        setProfileLoading(false)
       })
     return () => {
       cancel = true
@@ -50,7 +58,7 @@ export default function App() {
     setTab('week')
   }
 
-  if (loading) {
+  if (loading || profileLoading) {
     return <div className="center-screen">Cargando…</div>
   }
 
