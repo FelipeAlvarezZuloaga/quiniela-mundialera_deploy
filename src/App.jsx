@@ -45,6 +45,7 @@ export default function App() {
 
   async function logout() {
     await supabase.auth.signOut()
+    setSession(null)
     setProfile(null)
     setTab('week')
   }
